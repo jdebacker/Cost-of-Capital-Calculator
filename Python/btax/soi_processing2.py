@@ -84,11 +84,36 @@ def get_soi_data(datapaths):
         all_corp = all_corp.drop(all_corp[all_corp['AC']> 1.].index)
         # drop total across all industries
         all_corp = all_corp.drop(all_corp[all_corp['INDY_CD']== 1.].index)
-        # create variables for sector and major and minor industry codes
-        c_corp['ind_sector'] = np.where((c_corp['INDY_CD']>1.)&(c_corp['INDY_CD']<100.), c_corp['INDY_CD'],0)
-        c_corp['ind_major'] = np.where((c_corp['INDY_CD']>99.)&(c_corp['INDY_CD']<1000.), c_corp['INDY_CD'],0)
-        c_corp['ind_major'] = np.where(c_corp['INDY_CD']>999., divmod(c_corp['INDY_CD'],1000.)[0],0)
-        c_corp['ind_minor'] = np.where(c_corp['INDY_CD']>10000., c_corp['INDY_CD'],0)
+
+        corp_data_numeric_vars_names = ['TOT_ASSTS_IND','TOT_ASSTS','CASH_IND','CASH','TRD_NOTES_ACCTS_RCV_IND',
+                      'TRD_NOTES_ACCTS_RCV','BAD_DBT_ALLW_IND','BAD_DBT_ALLW','INVNTRY_IND','INVNTRY','GVT_OBLGNS_IND',
+                      'GVT_OBLGNS','TX_EXMT_SEC_IND','TX_EXMT_SEC','OTHR_CUR_ASSTS_IND','OTHR_CUR_ASSTS','LNS_TO_STKHDR_IND',
+                      'LNS_TO_STKHDR','MRTG_RE_LNS_IND','MRTG_RE_LNS','OTHR_INVSMTS_IND','OTHR_INVSMTS','DPRCBL_ASSTS_IND',
+                      'DPRCBL_ASSTS','ACCUM_DPR_IND','ACCUM_DPR','DPTBL_ASSTS_IND','DPTBL_ASSTS','ACCUM_DPLTN_IND','ACCUM_DPLTN',
+                      'LAND_IND','LAND','INTNGBL_ASSTS_IND','INTNGBL_ASSTS','ACCUM_AMORT_IND','ACCUM_AMORT','COMP_OTHR_ASSTS_IND',
+                      'COMP_OTHR_ASSTS','TOT_LBLTS_IND','TOT_LBLTS','ACCTS_PYBL_IND','ACCTS_PYBL','MRTG_LT_1YR_IND','MRTG_LT_1YR',
+                      'COMP_OTHR_CUR_LBLTS_IND','COMP_OTHR_CUR_LBLTS','LNS_FRM_STKHDR_IND','LNS_FRM_STKHDR','MRTG_GT_1YR_IND',
+                      'MRTG_GT_1YR','COMP_OTHR_LBLTS_IND','COMP_OTHR_LBLTS','COMP_NET_WRTH_IND','COMP_NET_WRTH','CAP_STCK_IND',
+                      'CAP_STCK','PD_CAP_SRPLS_IND','PD_CAP_SRPLS','RTND_ERNGS_APPR_IND','RTND_ERNGS_APPR','COMP_RTND_ERNGS_UNAPPR_IND',
+                      'COMP_RTND_ERNGS_UNAPPR','CST_TRSRY_STCK_IND','CST_TRSRY_STCK','COMP_TOT_RCPTS_IND','COMP_TOT_RCPTS',
+                      'GRS_RCPTS_IND','GRS_RCPTS','INTRST_IND','INTRST','COMP_TX_EXMT_INTRST_IND','COMP_TX_EXMT_INTRST',
+                      'COMP_GRS_RNTS_IND','COMP_GRS_RNTS','GRS_RYLTS_IND','GRS_RYLTS','D_NET_STCG_IND','D_NET_STCG',
+                      'D_NET_LTCG_TOT_IND','D_NET_LTCG_TOT','NET_GN_LSS_POS_IND','NET_GN_LSS_POS','COMP_DIV_DOM_CORP_IND',
+                      'COMP_DIV_DOM_CORP','COMP_DIV_FRN_CORP_IND','COMP_DIV_FRN_CORP','COMP_OTHR_RCPTS_IND','COMP_OTHR_RCPTS',
+                      'COMP_TOT_DED_IND','COMP_TOT_DED','CST_OF_GDS_IND','CST_OF_GDS','CMPNSTN_OFFCRS_IND','CMPNSTN_OFFCRS',
+                      'SLRS_WGS_IND','SLRS_WGS','RPRS_IND','RPRS','BAD_DBT_DED_IND','BAD_DBT_DED','RNTS_PD_IND','RNTS_PD',
+                      'TX_PD_IND','TX_PD','INTRST_PD_IND','INTRST_PD','CNTRBTNS_IND','CNTRBTNS','TOT_AMORT_IND','TOT_AMORT',
+                      'NET_DPR_IND','NET_DPR','DPLTN_IND','DPLTN','ADVRTSNG_IND','ADVRTSNG','PNSN_PRFT_SHRNG_PLNS_IND',
+                      'PNSN_PRFT_SHRNG_PLNS','EMP_BNFT_PRG_IND','EMP_BNFT_PRG','DP_PROD_ACTVTY_DED_IND','DP_PROD_ACTVTY_DED',
+                      'NET_GN_LSS_NEG_IND','NET_GN_LSS_NEG','COMP_OTHR_DED_IND','COMP_OTHR_DED','COMP_TOT_RCPTS_LS_TOT_DED_IND',
+                      'COMP_TOT_RCPTS_LS_TOT_DED','COMP_TXBL_INCM_RFC_IND','COMP_TXBL_INCM_RFC','NET_INCM_IND','NET_INCM',
+                      'NET_INCM_POS_IND','NET_INCM_POS','NET_INCM_NEG_IND','NET_INCM_NEG','NET_INCM_S_IND','NET_INCM_S',
+                      'COMP_TOT_STAT_SPCL_DED_IND','COMP_TOT_STAT_SPCL_DED','NOLD_IND','NOLD','COMP_DIV_RCVD_DED_IND',
+                      'COMP_DIV_RCVD_DED','COMP_INCM_SBJ_TX_TOT_IND','COMP_INCM_SBJ_TX_TOT','COMP_TX_BFR_CRS_IND',
+                      'COMP_TX_BFR_CRS','INCM_TX_IND','INCM_TX','ALT_MIN_TX_IND','ALT_MIN_TX','FRN_TX_CR_IND','FRN_TX_CR',
+                      'GEN_BUS_CR_IND','GEN_BUS_CR','MIN_TX_CR_IND','MIN_TX_CR','COMP_TX_AFTR_CRS_IND','COMP_TX_AFTR_CRS',
+                      '(cash_dist + prpty_dist)_IND','(cash_dist + prpty_dist)','STCK_DIST_IND','STCK_DIST']
+        corp_data_variables_of_interest = ['TOT_ASSTS','DPRCBL_ASSTS','ACCUM_DPR']
     except IOError:
         print "IOError: SOI total corp data file not found."
         return None
@@ -98,27 +123,61 @@ def get_soi_data(datapaths):
         s_corp = s_corp.drop(s_corp[s_corp['AC']> 1.].index)
         # drop total across all industries
         s_corp = s_corp.drop(s_corp[s_corp['INDY_CD']== 1.].index)
-        # create variable for sector code
-        s_corp['ind_sector'] = np.where((s_corp['INDY_CD']>1.)&(s_corp['INDY_CD']<100.), s_corp['INDY_CD'],0)
 
-    #load industry codes
-    soi_ind_codes = pd.read_csv(datapaths['soi_codes']).fillna(0)
 
     except IOError:
         print "IOError: SOI S-corp data file not found."
         return None
 
-    # create ratios are minor indusry level
+    #load industry codes
+    soi_ind_codes = pd.read_csv(datapaths['soi_codes']).fillna(0)
 
-    # create dataframe with just major indusry codes (2-digit)
-    all_corp_major_ind = all_corp.drop(all_corp[all_corp['INDY_CD']> 100.].index)
+    # merge codes to corp data
+    all_corp = pd.merge(all_corp, soi_ind_codes, how='inner', left_on=['INDY_CD'], right_on=['minor_code_alt'],
+      left_index=False, right_index=False, sort=False,
+      suffixes=('_x', '_y'), copy=True, indicator=True)
+    # keep only rows that match in both datasets - this should keep only unique soi minor industries
+    all_corp = all_corp.drop(all_corp[all_corp['_merge']!='both' ].index)
+
+    corp_ratios = all_corp[['INDY_CD','minor_code_alt','minor_code','major_code','sector_code']]
+    for var in corp_data_variables_of_interest :
+        corp_ratios[var+'_ratio'] = all_corp.groupby(['sector_code'])[var].apply(lambda x: x/float(x.sum()))
+
+    #print corp_ratios['sector_code'][:5], corp_ratios['minor_code_alt'][:5],    corp_ratios['TOT_ASSTS_ratio'][:5]
+
+    # new data w just ratios that will then merge to s corp data by sector code (many to one merge)
+    # first just keep s corp columns want
+    s_corp = s_corp[['INDY_CD']+corp_data_variables_of_interest]
+    # merge ratios to s corp data
+    s_corp = pd.merge(corp_ratios, s_corp, how='left', left_on=['sector_code'], right_on=['INDY_CD'],
+      left_index=False, right_index=False, sort=False,
+      suffixes=('_x', '_y'), copy=True, indicator=True)
+
+    #calculate s corp values by minor industry using ratios
+    for var in corp_data_variables_of_interest :
+        s_corp[var] = s_corp[var]*s_corp[var+'_ratio']
+    print s_corp.head(n=5)
+
+    # now create c corp data by subtracting s_corp from all_corp
+    # first merge s_corp and all_corp
+    s_corp = s_corp.drop(['_merge'], axis=1)
+    all_corp = all_corp.drop(['_merge'], axis=1)
+    all_merged = pd.merge(all_corp, s_corp, how='inner', left_on=['minor_code_alt'], right_on=['minor_code_alt'],
+      left_index=False, right_index=False, sort=False,
+      suffixes=('_x', '_y'), copy=True, indicator=True)
+    # c_corp = all_merged[['INDY_CD','minor_code_alt','minor_code','major_code','sector_code']]
+    c_corp = all_merged[['INDY_CD','minor_code_alt']]
+    for var in corp_data_variables_of_interest :
+        c_corp[var] = all_merged[var+'_x']-all_merged[var+'_y']
+    print c_corp.head(n=5)
+
 
     soi_data = {'c_corp':all_corp, 's_corp':s_corp}
 
     return soi_data
 
 df_dict = get_soi_data(datapaths)
-print df_dict['s_corp'].describe()
+#print df_dict['s_corp'].describe()
 
 
 def load_corporate(soi_tree,
