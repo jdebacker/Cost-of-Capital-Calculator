@@ -169,15 +169,16 @@ def get_soi_data(datapaths):
     c_corp = all_merged[['INDY_CD','minor_code_alt']]
     for var in corp_data_variables_of_interest :
         c_corp[var] = all_merged[var+'_x']-all_merged[var+'_y']
-    print c_corp.head(n=5)
+    #print c_corp.head(n=5)
 
 
-    soi_data = {'c_corp':all_corp, 's_corp':s_corp}
+    soi_data = {'c_corp':c_corp, 's_corp':s_corp}
 
     return soi_data
 
 df_dict = get_soi_data(datapaths)
-#print df_dict['s_corp'].describe()
+print df_dict['s_corp'].describe()
+print df_dict['c_corp'].describe()
 
 
 def load_corporate(soi_tree,
