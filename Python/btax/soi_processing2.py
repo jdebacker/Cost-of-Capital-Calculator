@@ -138,6 +138,7 @@ def get_soi_data(datapaths):
       suffixes=('_x', '_y'), copy=True, indicator=True)
     # keep only rows that match in both datasets - this should keep only unique soi minor industries
     all_corp = all_corp.drop(all_corp[all_corp['_merge']!='both' ].index)
+    all_corp.to_csv('all_corp.csv')
 
     corp_ratios = all_corp[['INDY_CD','minor_code_alt','minor_code','major_code','sector_code']]
     for var in corp_data_variables_of_interest :
@@ -148,6 +149,7 @@ def get_soi_data(datapaths):
     # new data w just ratios that will then merge to s corp data by sector code (many to one merge)
     # first just keep s corp columns want
     s_corp = s_corp[['INDY_CD']+corp_data_variables_of_interest]
+    s_corp.to_csv('raw_s_corp.csv')
     # merge ratios to s corp data
     s_corp = pd.merge(corp_ratios, s_corp, how='left', left_on=['sector_code'], right_on=['INDY_CD'],
       left_index=False, right_index=False, sort=False,
@@ -156,7 +158,7 @@ def get_soi_data(datapaths):
     #calculate s corp values by minor industry using ratios
     for var in corp_data_variables_of_interest :
         s_corp[var] = s_corp[var]*s_corp[var+'_ratio']
-    print s_corp.head(n=5)
+   
 
     # now create c corp data by subtracting s_corp from all_corp
     # first merge s_corp and all_corp
@@ -165,6 +167,8 @@ def get_soi_data(datapaths):
     all_merged = pd.merge(all_corp, s_corp, how='inner', left_on=['minor_code_alt'], right_on=['minor_code_alt'],
       left_index=False, right_index=False, sort=False,
       suffixes=('_x', '_y'), copy=True, indicator=True)
+    #print all_merged.describe()
+    #quit()
     # c_corp = all_merged[['INDY_CD','minor_code_alt','minor_code','major_code','sector_code']]
     c_corp = all_merged[['INDY_CD','minor_code_alt']]
     for var in corp_data_variables_of_interest :
@@ -179,6 +183,8 @@ def get_soi_data(datapaths):
 df_dict = get_soi_data(datapaths)
 print df_dict['s_corp'].describe()
 print df_dict['c_corp'].describe()
+df_dict['c_corp'].to_csv('c_corp.csv')
+df_dict['s_corp'].to_csv('s_corp.csv')
 
 
 def load_corporate(soi_tree,
