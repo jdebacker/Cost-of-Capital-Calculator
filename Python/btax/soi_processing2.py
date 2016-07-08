@@ -167,24 +167,22 @@ def get_soi_data(datapaths):
     all_merged = pd.merge(all_corp, s_corp, how='inner', left_on=['minor_code_alt'], right_on=['minor_code_alt'],
       left_index=False, right_index=False, sort=False,
       suffixes=('_x', '_y'), copy=True, indicator=True)
-    #print all_merged.describe()
-    #quit()
-    # c_corp = all_merged[['INDY_CD','minor_code_alt','minor_code','major_code','sector_code']]
+
+    # create c corp only data by subtracting s corps from c corp totals
     c_corp = all_merged[['INDY_CD','minor_code_alt']]
     for var in corp_data_variables_of_interest :
         c_corp[var] = all_merged[var+'_x']-all_merged[var+'_y']
-    #print c_corp.head(n=5)
 
 
+    # group industries as BEA has them
+
+    # put dataframes in dictionary
     soi_data = {'c_corp':c_corp, 's_corp':s_corp}
 
     return soi_data
 
 df_dict = get_soi_data(datapaths)
-print df_dict['s_corp'].describe()
-print df_dict['c_corp'].describe()
-df_dict['c_corp'].to_csv('c_corp.csv')
-df_dict['s_corp'].to_csv('s_corp.csv')
+
 
 
 def load_corporate(soi_tree,
