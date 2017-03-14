@@ -34,12 +34,15 @@ _NAICS_COL_NM = 'INDY_CD'
 _CODE_RANGE = ['32', '33', '45', '49']
 _PARENTS = {'32':'31','33':'31','45':'44','49':'48'}
 
-def load_corp_data():
+def load_corp_data(year_of_data=2013):
     """Reads in the total corp and s corp data and calculates the c corp data.
 
         :returns: soi corporate capital stock data
         :rtype: dictionary
     """
+    if year of data = 2012:
+        _S_CORP_IN_PATH = _S_CORP_IN_PATH.replace("2013", "2012")
+        _TOT_CORP_IN_PATH = _TOT_CORP_IN_PATH.replace("2013", "2012")
     cols_dict=_DFLT_S_CORP_COLS_DICT
     # Dataframe column names
     data_cols = cols_dict.keys()
