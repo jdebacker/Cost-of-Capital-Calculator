@@ -40,9 +40,10 @@ def load_corp_data(year_of_data=2013):
         :returns: soi corporate capital stock data
         :rtype: dictionary
     """
-    if year of data = 2012:
-        _S_CORP_IN_PATH = _S_CORP_IN_PATH.replace("2013", "2012")
-        _TOT_CORP_IN_PATH = _TOT_CORP_IN_PATH.replace("2013", "2012")
+    if year_of_data != 2013:
+        global _S_CORP_IN_PATH, _TOT_CORP_IN_PATH
+        _S_CORP_IN_PATH = _S_CORP_IN_PATH.replace("2013", str(year_of_data))
+        _TOT_CORP_IN_PATH = _TOT_CORP_IN_PATH.replace("2013", str(year_of_data))
     cols_dict=_DFLT_S_CORP_COLS_DICT
     # Dataframe column names
     data_cols = cols_dict.keys()
