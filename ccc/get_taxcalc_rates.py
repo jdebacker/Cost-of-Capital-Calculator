@@ -86,7 +86,7 @@ def get_rates(baseline=False, start_year=DEFAULT_START_YEAR, reform={},
     calc1.calc_all()
 
     # Loop over years in window of calculations
-    end_year = start_year
+    end_year = TC_LAST_YEAR
     array_size = end_year - start_year + 1
     rates_dict = {'tau_div': 'e00650', 'tau_int': 'e00300',
                   'tau_scg': 'p22250', 'tau_lcg': 'p23250'}
