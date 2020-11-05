@@ -67,7 +67,7 @@ class Specification(paramtools.Parameters):
         self.entity_list = ['c', 'nc']
 
         # If new_view, then don't assume don't pay out any dividends
-        # This becuase under new view, equity investments are financed
+        # This because under new view, equity investments are financed
         # with retained earnings
         if self.new_view:
             self.m = 1
