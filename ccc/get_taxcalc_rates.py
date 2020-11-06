@@ -4,15 +4,18 @@ from taxcalc import Policy, Records, Calculator
 from ccc.utils import DEFAULT_START_YEAR, TC_LAST_YEAR, RECORDS_START_YEAR
 
 
-def get_calculator(baseline, calculator_start_year, reform=None,
-                   data='cps', gfactors=None, weights=None,
+def get_calculator(baseline, calculator_start_year, calculator_end_year,
+                   reform=None, data='cps', gfactors=None, weights=None,
                    records_start_year=RECORDS_START_YEAR):
     '''
     This function creates the tax calculator object for the microsim
 
     Args:
         baseline (bool): `True` if baseline tax policy
-        calculator_start_year (integer): first year of budget window
+        calculator_start_year (integer): first year to consider in
+            calculations
+        calculator_end_year (integer): last year to consider in
+            calculations
         reform (dictionary): IIT reform parameters
         data (string or Pandas DataFrame): path to file or DataFrame
             for Tax-Calculator Records object (optional)
@@ -62,7 +65,8 @@ def get_calculator(baseline, calculator_start_year, reform=None,
     return calc1
 
 
-def get_rates(baseline=False, start_year=DEFAULT_START_YEAR, reform={},
+def get_rates(baseline=False, start_year=DEFAULT_START_YEAR,
+              end_year=TC_LAST_YEAR, reform={},
               data='cps'):
     '''
     This function computes weighted average marginal tax rates using
@@ -70,7 +74,8 @@ def get_rates(baseline=False, start_year=DEFAULT_START_YEAR, reform={},
 
     Args:
         baseline (bool): `True` if baseline tax policy, `False` if reform
-        start_year (integer): first year of budget window
+        start_year (integer): first year of to consider
+        end_year (integer): first year to consider
         reform (dict): reform parameters
 
     Returns:
@@ -86,7 +91,6 @@ def get_rates(baseline=False, start_year=DEFAULT_START_YEAR, reform={},
     calc1.calc_all()
 
     # Loop over years in window of calculations
-    end_year = TC_LAST_YEAR
     array_size = end_year - start_year + 1
     rates_dict = {'tau_div': 'e00650', 'tau_int': 'e00300',
                   'tau_scg': 'p22250', 'tau_lcg': 'p23250'}

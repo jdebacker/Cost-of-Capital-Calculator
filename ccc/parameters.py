@@ -2,6 +2,7 @@ import os
 import paramtools
 import marshmallow as ma
 import copy
+import numpy as np
 
 # import ccc
 from ccc.get_taxcalc_rates import get_rates
@@ -20,25 +21,15 @@ class Specification(paramtools.Parameters):
     array_first = True
 
     def __init__(self, test=False, baseline=False,
-                 year=DEFAULT_START_YEAR, call_tc=False, iit_reform={},
+                 start_year=DEFAULT_START_YEAR,
+                 end_year=TC_LAST_YEAR, call_tc=False, iit_reform={},
                  data='cps', **kwargs):
-        # if (
-        #     year and "initial_state" not in kwargs
-        # ):
-        #     kwargs["initial_state"] = {
-        #         "year": year
-        #     }
-        # super().__init__(**kwargs)
-        # self._init_values = {
-        #     param: copy.deepcopy(data["value"])
-        #     for param, data in self.read_params(self.defaults).items()
-        #     if param != "schema"
-        # }
         super().__init__()
-        # self.set_state(year=year)
+        self.set_state(year=list(np.arange(start_year, end_year +1 )))
         self.test = test
         self.baseline = baseline
-        self.year = year
+        self.start_year = start_year
+        self.end_year = end_year
         self.iit_reform = iit_reform
         self.data = data
         # initialize parameter values from JSON
@@ -59,8 +50,9 @@ class Specification(paramtools.Parameters):
         '''
         if call_tc:
             # Find individual income tax rates from Tax-Calculator
-            indiv_rates = get_rates(self.baseline, self.year,
-                                    self.iit_reform, self.data)
+            indiv_rates = get_rates(
+                self.baseline, self.start_year, self.end_year,
+                self.iit_reform, self.data)
             self.tau_nc = indiv_rates['tau_nc']
             self.tau_div = indiv_rates['tau_div']
             self.tau_int = indiv_rates['tau_int']
@@ -83,18 +75,20 @@ class Specification(paramtools.Parameters):
         # This because under new view, equity investments are financed
         # with retained earnings
         print('Self CIT = ', self.CIT_rate)
-        if self.new_view:
-            self.m = 1
+        self.m[self.new_view is True] = 1
 
         # Get after-tax return to savers
         self.s, E_nc = pf.calc_s(self)
 
         # Set rate of 1st layer of taxation on investment income
         self.u = {'c': self.CIT_rate}
-        if not self.PT_entity_tax_ind.all():
-            self.u['nc'] = self.tau_nc
-        else:
-            self.u['nc'] = self.PT_entity_tax_rate
+        self.u['nc'] = self.PT_entity_tax_rate
+        self.u['nc'][self.PT_entity_tax_ind is False] = (
+            self.tau_nc[self.PT_entity_tax_ind is False])
+        # if not self.PT_entity_tax_ind.all():
+        #     self.u['nc'] = self.tau_nc
+        # else:
+        #     self.u['nc'] = self.PT_entity_tax_rate
         E_dict = {'c': self.E_c, 'nc': E_nc}
 
         # Allowance for Corporate Equity
@@ -115,19 +109,21 @@ class Specification(paramtools.Parameters):
 
         # if no entity level taxes on pass-throughs, ensure mettr and metr
         # on non-corp entities the same
-        if not self.PT_entity_tax_ind:
-            for f in self.financing_list:
-                r_prime['nc'][f] = self.s['nc'][f] + self.inflation_rate
-        # if entity level tax, assume distribute earnings at same rate corps
-        # distribute dividends and these are taxed at dividends tax rate
-        # (which seems likely).  Also implicitly assumed that if entity
-        # level tax, then only additional taxes on pass-through income are
-        # capital gains and dividend taxes
-        else:
-            # keep debt and equity financing ratio the same even though now
-            # entity level tax that might now favor debt
-            self.s['nc']['mix'] = (self.f_nc * self.s['nc']['d'] +
-                                   (1 - self.f_nc) * self.s['c']['e'])
+        for y, v in enumerate(self.PT_entity_tax_ind):
+            if not v:
+                for f in self.financing_list:
+                    r_prime['nc'][f][y] = self.s['nc'][f][y] + self.inflation_rate[y]
+            # if entity level tax, assume distribute earnings at same rate corps
+            # distribute dividends and these are taxed at dividends tax rate
+            # (which seems likely).  Also implicitly assumed that if entity
+            # level tax, then only additional taxes on pass-through income are
+            # capital gains and dividend taxes
+            else:
+                # keep debt and equity financing ratio the same even though now
+                # entity level tax that might now favor debt
+                self.s['nc']['mix'][y] = (
+                    self.f_nc * self.s['nc']['d'][y] +
+                    (1 - self.f_nc) * self.s['c']['e'][y])
         self.r_prime = r_prime
 
         # Map string tax methods into multiple of declining balance
@@ -141,12 +137,14 @@ class Specification(paramtools.Parameters):
             (str(i) if i != 27.5 else '27_5') for i in class_list
         ]
         self.bonus_deprec = {}
+        print('Bonus deprec object = ', self.BonusDeprec_5yr)
         for cl in class_list_str:
             self.bonus_deprec[cl] = getattr(
                 self, 'BonusDeprec_{}yr'.format(cl))
         # to handle land and inventories
         # this is fixed later, but should work on this
-        self.bonus_deprec['100'] = 0.0
+        self.bonus_deprec['100'] = np.zeros(
+            self.end_year - self.start_year + 1)
 
     def default_parameters(self):
         '''
