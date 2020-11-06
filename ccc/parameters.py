@@ -1,10 +1,11 @@
 import os
 import paramtools
 import marshmallow as ma
+import copy
 
 # import ccc
 from ccc.get_taxcalc_rates import get_rates
-from ccc.utils import DEFAULT_START_YEAR
+from ccc.utils import DEFAULT_START_YEAR, TC_LAST_YEAR
 import ccc.paramfunctions as pf
 CURRENT_PATH = os.path.abspath(os.path.dirname(__file__))
 
@@ -20,9 +21,21 @@ class Specification(paramtools.Parameters):
 
     def __init__(self, test=False, baseline=False,
                  year=DEFAULT_START_YEAR, call_tc=False, iit_reform={},
-                 data='cps'):
+                 data='cps', **kwargs):
+        # if (
+        #     year and "initial_state" not in kwargs
+        # ):
+        #     kwargs["initial_state"] = {
+        #         "year": year
+        #     }
+        # super().__init__(**kwargs)
+        # self._init_values = {
+        #     param: copy.deepcopy(data["value"])
+        #     for param, data in self.read_params(self.defaults).items()
+        #     if param != "schema"
+        # }
         super().__init__()
-        self.set_state(year=year)
+        # self.set_state(year=year)
         self.test = test
         self.baseline = baseline
         self.year = year
@@ -69,6 +82,7 @@ class Specification(paramtools.Parameters):
         # If new_view, then don't assume don't pay out any dividends
         # This because under new view, equity investments are financed
         # with retained earnings
+        print('Self CIT = ', self.CIT_rate)
         if self.new_view:
             self.m = 1
 
