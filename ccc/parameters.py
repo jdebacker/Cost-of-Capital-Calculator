@@ -1,7 +1,6 @@
 import os
 import paramtools
 import marshmallow as ma
-import copy
 import numpy as np
 
 # import ccc
