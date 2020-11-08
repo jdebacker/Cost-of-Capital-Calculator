@@ -21,7 +21,7 @@ def test_default_parameters():
 
 def test_update_specification_with_dict():
     cyr = 2020
-    spec = Specification(year=cyr)
+    spec = Specification(start_year=cyr, end_year=cyr)
     new_spec_dict = {
         'profit_rate': 0.4,
         'm': 0.5
@@ -34,30 +34,30 @@ def test_update_specification_with_dict():
 
 def test_new_view():
     cyr = 2020
-    spec = Specification(year=cyr)
+    spec = Specification(start_year=cyr, end_year=cyr)
     new_spec_dict = {
         'new_view': True,
     }
     spec.update_specification(new_spec_dict)
     assert spec.new_view
-    assert spec.m == 1
+    assert spec.m[0] == 1
 
 
 def test_PT_tax():
     cyr = 2020
-    spec = Specification(year=cyr)
+    spec = Specification(start_year=cyr, end_year=cyr)
     new_spec_dict = {
         'PT_entity_tax_ind': True,
         'PT_entity_tax_rate': 0.44
     }
     spec.update_specification(new_spec_dict)
     assert spec.PT_entity_tax_ind
-    assert spec.u['nc'] == 0.44
+    assert spec.u['nc'][0] == 0.44
 
 
 def test_update_specification_with_json():
     cyr = 2020
-    spec = Specification(year=cyr)
+    spec = Specification(start_year=cyr, end_year=cyr)
     new_spec_json = """
     {
     "profit_rate": [
@@ -75,8 +75,8 @@ def test_update_specification_with_json():
     }
     """
     spec.update_specification(new_spec_json)
-    assert spec.profit_rate == 0.4
-    assert spec.m == 0.5
+    assert spec.profit_rate[0] == 0.4
+    assert spec.m[0] == 0.5
     assert len(spec.errors) == 0
 
 
@@ -84,7 +84,7 @@ def test_update_bad_revision1():
     spec = Specification()
     # profit rate has an upper bound at 1.0
     revs = {
-        'profit_rate': [{'year': spec.year, 'value': 1.2}]
+        'profit_rate': [{'year': spec.start_year, 'value': 1.2}]
     }
     spec.update_specification(revs, raise_errors=False)
     assert len(spec.errors) > 0
@@ -129,7 +129,7 @@ def test_update_bad_revsions5():
     spec = Specification()
     # profit rate has an upper bound at 1.0
     revs = {
-        'profit_rate': [{'year': spec.year, 'value': 1.2}]
+        'profit_rate': [{'year': spec.start_year, 'value': 1.2}]
     }
     with pytest.raises(Exception):
         assert spec.update_specification(revs, raise_errors=True)

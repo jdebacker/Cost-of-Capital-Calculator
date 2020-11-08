@@ -85,6 +85,7 @@ def get_rates(baseline=False, start_year=DEFAULT_START_YEAR,
     '''
     calc1 = get_calculator(baseline=baseline,
                            calculator_start_year=start_year,
+                           calculator_end_year=end_year,
                            reform=reform, data=data)
 
     # running all the functions and calculates taxes

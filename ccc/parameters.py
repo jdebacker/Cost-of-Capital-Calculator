@@ -75,7 +75,7 @@ class Specification(paramtools.Parameters):
         # This because under new view, equity investments are financed
         # with retained earnings
         print('Self CIT = ', self.CIT_rate)
-        self.m[self.new_view is True] = 1
+        self.m[self.new_view == True] = 1
 
         # Get after-tax return to savers
         self.s, E_nc = pf.calc_s(self)
@@ -83,8 +83,8 @@ class Specification(paramtools.Parameters):
         # Set rate of 1st layer of taxation on investment income
         self.u = {'c': self.CIT_rate}
         self.u['nc'] = self.PT_entity_tax_rate
-        self.u['nc'][self.PT_entity_tax_ind is False] = (
-            self.tau_nc[self.PT_entity_tax_ind is False])
+        self.u['nc'][self.PT_entity_tax_ind == False] = (
+            self.tau_nc[self.PT_entity_tax_ind == False])
         # if not self.PT_entity_tax_ind.all():
         #     self.u['nc'] = self.tau_nc
         # else:
