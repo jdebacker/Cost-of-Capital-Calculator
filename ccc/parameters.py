@@ -73,7 +73,6 @@ class Specification(paramtools.Parameters):
         # If new_view, then don't assume don't pay out any dividends
         # This because under new view, equity investments are financed
         # with retained earnings
-        print('Self CIT = ', self.CIT_rate)
         self.m[self.new_view == True] = 1
 
         # Get after-tax return to savers
@@ -136,7 +135,6 @@ class Specification(paramtools.Parameters):
             (str(i) if i != 27.5 else '27_5') for i in class_list
         ]
         self.bonus_deprec = {}
-        print('Bonus deprec object = ', self.BonusDeprec_5yr)
         for cl in class_list_str:
             self.bonus_deprec[cl] = getattr(
                 self, 'BonusDeprec_{}yr'.format(cl))
