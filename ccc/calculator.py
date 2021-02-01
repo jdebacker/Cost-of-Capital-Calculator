@@ -135,28 +135,33 @@ class Calculator():
         # conducts static analysis of Calculator object for current_year
         self.__assets.df = update_depr_methods(
             self.__assets.df, self.__p, self.__dp)
-        dfs = {'c': self.__assets.df[
-               self.__assets.df['tax_treat'] == 'corporate'].copy(),
-               'nc': self.__assets.df[
-               self.__assets.df['tax_treat'] == 'non-corporate'].copy()}
+        num_years = self.__p.end_year - self.__p.start_year + 1
+        dfs = {'c': [self.__assets.df[
+               self.__assets.df['tax_treat'] == 'corporate'].copy()] *
+               num_years,
+               'nc': [self.__assets.df[
+                      self.__assets.df['tax_treat'] == 'non-corporate'].copy()]
+               * num_years}
         # separate into corp and non-corp dataframe here
-        for t in self.__p.entity_list:
-            for f in self.__p.financing_list:
-                dfs[t]['z_' + str(f)] = npv_tax_depr(
-                    dfs[t], self.__p.r[t][f], self.__p.inflation_rate,
-                    self.__p.land_expensing)
-                dfs[t]['rho_' + str(f)] = eq_coc(
-                    dfs[t]['delta'], dfs[t]['z_' + str(f)],
-                    self.__p.property_tax,
-                    self.__p.u[t], self.__p.inv_tax_credit,
-                    self.__p.inflation_rate, self.__p.r[t][f])
-                if not self.__p.inventory_expensing:
-                    idx = dfs[t]['asset_name'] == 'Inventories'
-                    dfs[t].loc[idx, 'rho_' + str(f)] = np.squeeze(
-                        eq_coc_inventory(
-                            self.__p.u[t], self.__p.phi, self.__p.Y_v,
-                            self.__p.inflation_rate, self.__p.r[t][f]))
-        self.__assets.df = pd.concat(dfs, ignore_index=True, copy=True,
+        for y in range(num_years):
+            for t in self.__p.entity_list:
+                dfs[t][y]['Year'] = self.__p.start_year + y
+                for f in self.__p.financing_list:
+                    dfs[t][y]['z_' + str(f)] = npv_tax_depr(
+                        dfs[t][y], self.__p.r[t][f][y], self.__p.inflation_rate[y],
+                        self.__p.land_expensing[y])
+                    dfs[t][y]['rho_' + str(f)] = eq_coc(
+                        dfs[t][y]['delta'], dfs[t][y]['z_' + str(f)],
+                        self.__p.property_tax[y],
+                        self.__p.u[t][y], self.__p.inv_tax_credit[y],
+                        self.__p.inflation_rate[y], self.__p.r[t][f][y])
+                    if not self.__p.inventory_expensing[y]:
+                        idx = dfs[t][y]['asset_name'] == 'Inventories'
+                        dfs[t][y].loc[idx, 'rho_' + str(f)] = np.squeeze(
+                            eq_coc_inventory(
+                                self.__p.u[t][y], self.__p.phi[y], self.__p.Y_v[y],
+                                self.__p.inflation_rate[y], self.__p.r[t][f][y]))
+        self.__assets.df = pd.concat(dfs['c'] + dfs['nc'], ignore_index=True, copy=True,
                                      sort=True)
 
     def calc_all(self):
