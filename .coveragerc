@@ -1,0 +1,4 @@
+[run]
+omit =
+    ccc/tests/*
+    cs-config/*

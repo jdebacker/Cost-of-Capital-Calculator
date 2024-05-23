@@ -1,38 +1,39 @@
-import glob
-import os
-
-import versioneer
-
 try:
-	from setuptools import setup
+    from setuptools import setup
 except ImportError:
-	from distutils.core import setup
+    from distutils.core import setup
 
-def get_data_files():
-    files = []
-    root = os.path.join('btax', 'data')
-    for r, d, f in os.walk(root):
-        files.extend(os.path.join(r, fi) for fi in f)
-    files += glob.glob(os.path.join('btax', 'param_defaults', '*.json'))
-    return [os.path.relpath(f, 'btax') for f in files]
+with open("README.md") as f:
+    longdesc = f.read()
 
-setup(    version=versioneer.get_version(),
-          cmdclass=versioneer.get_cmdclass(),
-          name='btax',
-	  description ='Business tax calculator',
-	  long_description = 'Calculates the marginal effective tax rate and marginal effective total tax rate by asset type',
-	  classifiers =[
-	  		'Programming Language :: Python :: 2.7'
-	  		'Topic :: Software Development :: Libraries :: Python Modules'
-	  ],
-	  author='Benjamin Gardner',
-	  author_email='bfgard@gmail.com',
-	  url='https://github.com/open-source-economics/B-Tax',
-	  packages=['btax'],
-          package_data={'btax': get_data_files()},
-	  install_requires=[],
-          entry_points={
-          'console_scripts': [
-              'run-btax = btax.run_btax:main',
-          ]}
-)
+version = "1.4.0"
+
+config = {
+    "description": "CCC: A Cost of Capital Calculator",
+    "url": "https://github.com/PSLmodels/Cost-of-Capital-Calculator",
+    "download_url": "https://github.com/PSLmodels/Cost-of-Capital-Calculator",
+    "long_description_content_type": "text/markdown",
+    "long_description": longdesc,
+    "version": version,
+    "license": "CC0 1.0 Universal (CC0 1.0) Public Domain Dedication",
+    "packages": ["ccc"],
+    "include_package_data": True,
+    "name": "cost-of-capital-calculator",
+    "install_requires": ["taxcalc", "pandas", "bokeh", "numpy", "paramtools"],
+    "classifiers": [
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: Developers",
+        "Natural Language :: English",
+        "License :: CC0 1.0 Universal (CC0 1.0) Public Domain Dedication",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Topic :: Software Development :: Libraries :: Python Modules",
+    ],
+    "tests_require": ["pytest"],
+}
+
+setup(**config)

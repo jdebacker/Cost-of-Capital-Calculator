@@ -1,0 +1,23 @@
+name: ccc-dev
+channels:
+- conda-forge
+dependencies:
+- python
+- "taxcalc>=3.1.0"
+- "paramtools>=0.18.0"
+- "pandas>=2.2.0"
+- bokeh>=3.1.1
+- setuptools
+- pip
+- xlrd
+- openpyxl
+- pytest
+- pytest-xdist
+- pycodestyle
+- pylint
+- coverage
+- black
+- pip:
+  - jupyter-book>=0.9.1
+  - "cs-kit>=1.16.8"
+  - cs2tc
